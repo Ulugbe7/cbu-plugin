@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: cbu-plugin
+
+rest-template:
+  read-timeout: 5000
+  connection-timeout: 5000
+
+mock:
+  simulated: true
+
+cbu:
+  base-url: https://cbu.uz
