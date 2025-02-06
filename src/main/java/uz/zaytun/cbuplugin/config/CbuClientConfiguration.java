@@ -10,16 +10,16 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
-import uz.zaytun.cbuplugin.config.props.RestTemplateProps;
+import uz.zaytun.cbuplugin.config.props.CbuProperties;
 
 import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableConfigurationProperties(RestTemplateProps.class)
-public class RestTemplateConfig {
+@EnableConfigurationProperties(CbuProperties.class)
+public class CbuClientConfiguration {
 
-    private final RestTemplateProps restTemplateProps;
+    private final CbuProperties cbuProperties;
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
@@ -36,8 +36,8 @@ public class RestTemplateConfig {
     @Bean
     public ClientHttpRequestFactory clientHttpRequestFactory() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(restTemplateProps.getConnectionTimeout());
-        factory.setReadTimeout(restTemplateProps.getReadTimeout());
+        factory.setConnectTimeout(cbuProperties.getClientConfig().getConnectionTimeout());
+        factory.setReadTimeout(cbuProperties.getClientConfig().getReadTimeout());
         return factory;
     }
 }

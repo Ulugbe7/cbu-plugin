@@ -1,40 +1,44 @@
-package uz.zaytun.cbuplugin.dto;
+package uz.zaytun.cbuplugin.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CurrencyDTO {
 
     @JsonProperty("id")
-    private int id;
+    private Integer id;
 
     @JsonProperty("Code")
     private String code;
 
     @JsonProperty("Ccy")
-    private String ccy;
+    private String currency;
 
     @JsonProperty("CcyNm_RU")
-    private String ccyNmRU;
+    private String currencyNameRu;
 
     @JsonProperty("CcyNm_UZ")
-    private String ccyNmUZ;
+    private String currencyNameUZ;
 
     @JsonProperty("CcyNm_UZC")
-    private String ccyNmUZC;
+    private String currencyNameUZC;
 
     @JsonProperty("CcyNm_EN")
-    private String ccyNmEN;
+    private String currencyNameEN;
 
     @JsonProperty("Nominal")
     private String nominal;
 
     @JsonProperty("Rate")
-    private double rate;
+    private String rate;
 
     @JsonProperty("Diff")
-    private double diff;
+    private String difference;
 
     @JsonProperty("Date")
     private String date;
