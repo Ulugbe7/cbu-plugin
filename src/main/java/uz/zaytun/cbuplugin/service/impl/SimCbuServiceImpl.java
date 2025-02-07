@@ -1,6 +1,7 @@
 package uz.zaytun.cbuplugin.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uz.zaytun.cbuplugin.domain.dto.BaseResponse;
@@ -11,7 +12,8 @@ import java.util.List;
 
 @Slf4j
 @Service
-@ConditionalOnProperty(name = "mock.simulate", havingValue = "mock")
+@Qualifier("impl")
+@ConditionalOnProperty(name = "cbu.cbu.simulate", havingValue = "mock", matchIfMissing = true)
 public class SimCbuServiceImpl implements CbuService {
 
     public SimCbuServiceImpl() {

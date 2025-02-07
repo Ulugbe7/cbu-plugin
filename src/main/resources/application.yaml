@@ -7,5 +7,5 @@ cbu:
     base-url: https://cbu.uz
     simulate: impl
   client-config:
-    connection-timeout: 10000
-    read-timeout: 10000
+    connection-timeout: 5000
+    read-timeout: 5000
