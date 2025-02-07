@@ -65,8 +65,8 @@ class CbuControllerTest {
 
         var currency2 = CurrencyDTO.builder()
                 .id(69)
-                .code("840")
-                .currency("USD")
+                .code("841")
+                .currency("EUR")
                 .currencyNameRu("Доллар США")
                 .currencyNameUz("AQSH dollari")
                 .currencyNameUzCyrillic("АҚШ доллари")
@@ -90,7 +90,7 @@ class CbuControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("CLIENT_ERROR"));
+                .andExpect(jsonPath("$.error").value("CLIENT_ERROR"));
     }
 
     @Test
@@ -103,7 +103,7 @@ class CbuControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("SERVER_ERROR"));
+                .andExpect(jsonPath("$.error").value("SERVER_ERROR"));
     }
 
     @Test
@@ -116,7 +116,7 @@ class CbuControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isGatewayTimeout())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("READ_TIMEOUT_ERROR"));
+                .andExpect(jsonPath("$.error").value("READ_TIMEOUT_ERROR"));
     }
 
     @Test
@@ -129,7 +129,7 @@ class CbuControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isGatewayTimeout())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.message").value("CONNECTION_TIMEOUT_ERROR"));
+                .andExpect(jsonPath("$.error").value("CONNECTION_TIMEOUT_ERROR"));
     }
 
     private void initCbuMockResponse(BaseResponse<List<CurrencyDTO>> mockResponse) {
