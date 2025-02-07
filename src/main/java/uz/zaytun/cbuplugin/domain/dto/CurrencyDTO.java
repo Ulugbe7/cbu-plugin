@@ -2,10 +2,12 @@ package uz.zaytun.cbuplugin.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CurrencyDTO {
@@ -23,13 +25,13 @@ public class CurrencyDTO {
     private String currencyNameRu;
 
     @JsonProperty("CcyNm_UZ")
-    private String currencyNameUZ;
+    private String currencyNameUz;
 
     @JsonProperty("CcyNm_UZC")
-    private String currencyNameUZC;
+    private String currencyNameUzCyrillic;
 
     @JsonProperty("CcyNm_EN")
-    private String currencyNameEN;
+    private String currencyNameEn;
 
     @JsonProperty("Nominal")
     private String nominal;

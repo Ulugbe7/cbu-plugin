@@ -22,7 +22,7 @@ public class CbuController {
     @GetMapping("/currency")
     public ResponseEntity<BaseResponse<List<CurrencyDTO>>> getCurrencies() {
         var cbuResponse = cbuService.getCurrencies();
-        return switch (cbuResponse.getMessage()) {
+        return switch (cbuResponse.getError()) {
             case SUCCESS -> ResponseEntity.ok(cbuResponse);
             case CLIENT_ERROR -> ResponseEntity.badRequest().body(cbuResponse);
             case SERVER_ERROR -> ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(cbuResponse);

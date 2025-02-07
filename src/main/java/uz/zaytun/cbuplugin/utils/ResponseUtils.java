@@ -14,14 +14,14 @@ public class ResponseUtils {
 
     public static <T> BaseResponse<T> validate(ResponseEntity<T> response) {
         if (response == null) {
-            return new BaseResponse<>(false, CbuErrors.NULL_RESPONSE_ERROR);
+            return new BaseResponse<>(false, "Response is null", CbuErrors.NULL_RESPONSE_ERROR);
         }
 
         HttpStatusCode status = response.getStatusCode();
         T body = response.getBody();
 
         if (body == null) {
-            return new BaseResponse<>(false, CbuErrors.NULL_BODY_ERROR);
+            return new BaseResponse<>(false, "Body is null", CbuErrors.NULL_BODY_ERROR);
         }
 
         if (status.is2xxSuccessful()) {
@@ -29,13 +29,13 @@ public class ResponseUtils {
         }
 
         if (status.is4xxClientError()) {
-            return new BaseResponse<>(false, CbuErrors.CLIENT_ERROR);
+            return new BaseResponse<>(false, response.toString(), CbuErrors.CLIENT_ERROR);
         }
 
         if (status.is5xxServerError()) {
-            return new BaseResponse<>(false, CbuErrors.SERVER_ERROR);
+            return new BaseResponse<>(false, response.toString(), CbuErrors.SERVER_ERROR);
         }
 
-        return new BaseResponse<>(false, CbuErrors.UNKNOWN_ERROR);
+        return new BaseResponse<>(false, response.toString(), CbuErrors.UNKNOWN_ERROR);
     }
 }

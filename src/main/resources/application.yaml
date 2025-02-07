@@ -3,7 +3,7 @@ spring:
     name: cbu-plugin
 
 cbu:
-  cbu:
+  setting:
     base-url: https://cbu.uz
     simulate: impl
   client-config:

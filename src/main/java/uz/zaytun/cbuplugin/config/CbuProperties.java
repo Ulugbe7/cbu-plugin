@@ -1,4 +1,4 @@
-package uz.zaytun.cbuplugin.config.props;
+package uz.zaytun.cbuplugin.config;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "cbu")
 public class CbuProperties {
     private String appName;
-    private final Cbu cbu = new Cbu();
+    private final Cbu setting = new Cbu();
     private final CbuClientProperties clientConfig = new CbuClientProperties();
 
     @Getter

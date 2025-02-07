@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,13 +15,16 @@ import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
-import uz.zaytun.cbuplugin.config.props.CbuProperties;
+import uz.zaytun.cbuplugin.config.CbuProperties;
 import uz.zaytun.cbuplugin.domain.dto.BaseResponse;
 import uz.zaytun.cbuplugin.domain.dto.CurrencyDTO;
 import uz.zaytun.cbuplugin.domain.enumuration.CbuErrors;
 import uz.zaytun.cbuplugin.service.CbuService;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
@@ -63,7 +67,7 @@ class CbuServiceImplTest {
 
         String responseJson = objectMapper.writeValueAsString(mockCurrencies);
 
-        mockServer.expect(ExpectedCount.once(), requestTo(cbuProperties.getCbu().getBaseUrl() + CBU_CURRENCY_ENDPOINT))
+        mockServer.expect(ExpectedCount.once(), requestTo(cbuProperties.getSetting().getBaseUrl() + CBU_CURRENCY_ENDPOINT))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON));
 
@@ -86,9 +90,8 @@ class CbuServiceImplTest {
 
     @Test
     void testGetCurrencies_ClientError() {
-        String baseUrl = cbuProperties.getCbu().getBaseUrl();
 
-        mockServer.expect(ExpectedCount.once(), requestTo(baseUrl + CBU_CURRENCY_ENDPOINT))
+        mockServer.expect(ExpectedCount.once(), requestTo(cbuProperties.getSetting().getBaseUrl() + CBU_CURRENCY_ENDPOINT))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withStatus(HttpStatus.BAD_REQUEST));
 
@@ -97,13 +100,13 @@ class CbuServiceImplTest {
 
         assertNotNull(response);
         assertFalse(response.getSuccess());
-        assertEquals(CbuErrors.CLIENT_ERROR, response.getMessage());
+        assertEquals(CbuErrors.CLIENT_ERROR, response.getError());
     }
 
     @Test
     void testGetCurrencies_ServerError() {
 
-        mockServer.expect(ExpectedCount.once(), requestTo(cbuProperties.getCbu().getBaseUrl() + CBU_CURRENCY_ENDPOINT))
+        mockServer.expect(ExpectedCount.once(), requestTo(cbuProperties.getSetting().getBaseUrl() + CBU_CURRENCY_ENDPOINT))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withServerError());
 
@@ -112,12 +115,12 @@ class CbuServiceImplTest {
 
         assertNotNull(response);
         assertFalse(response.getSuccess());
-        assertEquals(CbuErrors.SERVER_ERROR, response.getMessage());
+        assertEquals(CbuErrors.SERVER_ERROR, response.getError());
     }
 
     @Test
     void testGetCurrencies_ConnectionTimeout() {
-        mockServer.expect(ExpectedCount.once(), requestTo(cbuProperties.getCbu().getBaseUrl() + CBU_CURRENCY_ENDPOINT))
+        mockServer.expect(ExpectedCount.once(), requestTo(cbuProperties.getSetting().getBaseUrl() + CBU_CURRENCY_ENDPOINT))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(request -> {
                     throw new ResourceAccessException("Connection timed out");
@@ -129,21 +132,21 @@ class CbuServiceImplTest {
 
         assertNotNull(response);
         assertFalse(response.getSuccess());
-        assertEquals(CbuErrors.CONNECTION_TIMEOUT_ERROR, response.getMessage());
+        assertEquals(CbuErrors.CONNECTION_TIMEOUT_ERROR, response.getError());
     }
 
-/*
     @Test
+    @Disabled
     void testGetCurrencies_ReadTimeout() {
-        mockServer.expect(ExpectedCount.once(), requestTo(cbuProperties.getCbu().getBaseUrl() + CBU_CURRENCY_ENDPOINT))
+        mockServer.expect(ExpectedCount.once(), requestTo(cbuProperties.getSetting().getBaseUrl() + CBU_CURRENCY_ENDPOINT))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(request -> {
                             ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
                             scheduler.schedule(() -> {
-                            }, 6, TimeUnit.SECONDS); // 6s kechikish
+                            }, 6, TimeUnit.SECONDS);
                             scheduler.shutdown();
                             try {
-                                scheduler.awaitTermination(6, TimeUnit.SECONDS); // Asosiy oqimni bloklaydi
+                                scheduler.awaitTermination(6, TimeUnit.SECONDS);
                             } catch (InterruptedException e) {
                                 throw new RuntimeException(e);
                             }
@@ -156,7 +159,6 @@ class CbuServiceImplTest {
 
         assertNotNull(response);
         assertFalse(response.getSuccess());
-        assertEquals(CbuErrors.READ_TIMEOUT_ERROR, response.getMessage());
+        assertEquals(CbuErrors.READ_TIMEOUT_ERROR, response.getError());
     }
-*/
 }

@@ -11,19 +11,22 @@ import uz.zaytun.cbuplugin.domain.enumuration.CbuErrors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BaseResponse<T> {
-    private CbuErrors message;
+    private CbuErrors error;
+    private String description;
     private Boolean success;
     private T data;
 
     public BaseResponse(T data) {
         this.success = true;
-        this.message = CbuErrors.SUCCESS;
+        this.description = "Success";
+        this.error = CbuErrors.SUCCESS;
         this.data = data;
     }
 
-    public BaseResponse(Boolean success, CbuErrors message) {
+    public BaseResponse(Boolean success, String description, CbuErrors error) {
         this.success = success;
-        this.message = message;
+        this.description = description;
+        this.error = error;
         this.data = null;
     }
 }

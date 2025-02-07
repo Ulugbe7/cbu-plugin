@@ -10,7 +10,6 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
-import uz.zaytun.cbuplugin.config.props.CbuProperties;
 
 import java.util.List;
 
@@ -21,10 +20,11 @@ public class CbuClientConfiguration {
 
     private final CbuProperties cbuProperties;
 
-    @Bean
+    @Bean(value = "cbuRestTemplate")
     public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
         return restTemplateBuilder
                 .messageConverters(createMessageConverters())
+                .rootUri(cbuProperties.getSetting().getBaseUrl())
                 .build();
     }
 

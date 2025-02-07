@@ -32,11 +32,11 @@ class CbuControllerTest {
 
     @Test
     void testGetCurrencies_Success() throws Exception {
-        List<CurrencyDTO> mockCurrencies = getListResponseEntity();
+        var simulateCurrencies = loadSimulateData();
 
-        BaseResponse<List<CurrencyDTO>> mockResponse = new BaseResponse<>(mockCurrencies);
+        var mockResponse = new BaseResponse<>(simulateCurrencies);
 
-        Mockito.when(cbuService.getCurrencies()).thenReturn(mockResponse);
+        initCbuMockResponse(mockResponse);
 
         mockMvc.perform(get("/api/currency")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -48,20 +48,43 @@ class CbuControllerTest {
                 .andExpect(jsonPath("$.data[1].Code").value("841"));
     }
 
-    private List<CurrencyDTO> getListResponseEntity() {
-        return List.of(
-                new CurrencyDTO(69, "840", "USD", "Доллар США", "AQSH dollari", "АҚШ доллари",
-                        "US Dollar", "1", "12985.32", "-13.59", "06.02.2025"),
-                new CurrencyDTO(69, "841", "EUR", "Доллар США", "AQSH dollari", "АҚШ доллари",
-                        "US Dollar", "1", "12985.32", "-13.59", "06.02.2025")
-        );
+    private List<CurrencyDTO> loadSimulateData() {
+        var currency1 = CurrencyDTO.builder()
+                .id(69)
+                .code("840")
+                .currency("USD")
+                .currencyNameRu("Доллар США")
+                .currencyNameUz("AQSH dollari")
+                .currencyNameUzCyrillic("АҚШ доллари")
+                .currencyNameEn("US Dollar")
+                .nominal("1")
+                .rate("12985.32")
+                .difference("-13.59")
+                .date("06.02.2025")
+                .build();
+
+        var currency2 = CurrencyDTO.builder()
+                .id(69)
+                .code("840")
+                .currency("USD")
+                .currencyNameRu("Доллар США")
+                .currencyNameUz("AQSH dollari")
+                .currencyNameUzCyrillic("АҚШ доллари")
+                .currencyNameEn("US Dollar")
+                .nominal("1")
+                .rate("12985.32")
+                .difference("-13.59")
+                .date("06.02.2025")
+                .build();
+
+        return List.of(currency1, currency2);
     }
 
     @Test
     void testGetCurrencies_ClientError() throws Exception {
-        BaseResponse<List<CurrencyDTO>> mockResponse = new BaseResponse<>(false, CbuErrors.CLIENT_ERROR);
+        BaseResponse<List<CurrencyDTO>> mockResponse = new BaseResponse<>(false, "Client error", CbuErrors.CLIENT_ERROR);
 
-        Mockito.when(cbuService.getCurrencies()).thenReturn(mockResponse);
+        initCbuMockResponse(mockResponse);
 
         mockMvc.perform(get("/api/currency")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -72,9 +95,9 @@ class CbuControllerTest {
 
     @Test
     void testGetCurrencies_ServerError() throws Exception {
-        BaseResponse<List<CurrencyDTO>> mockResponse = new BaseResponse<>(false, CbuErrors.SERVER_ERROR);
+        BaseResponse<List<CurrencyDTO>> mockResponse = new BaseResponse<>(false, "Server error", CbuErrors.SERVER_ERROR);
 
-        Mockito.when(cbuService.getCurrencies()).thenReturn(mockResponse);
+        initCbuMockResponse(mockResponse);
 
         mockMvc.perform(get("/api/currency")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -85,9 +108,9 @@ class CbuControllerTest {
 
     @Test
     void testGetCurrencies_TimeoutError() throws Exception {
-        BaseResponse<List<CurrencyDTO>> mockResponse = new BaseResponse<>(false, CbuErrors.READ_TIMEOUT_ERROR);
+        BaseResponse<List<CurrencyDTO>> mockResponse = new BaseResponse<>(false, "Timeout error", CbuErrors.READ_TIMEOUT_ERROR);
 
-        Mockito.when(cbuService.getCurrencies()).thenReturn(mockResponse);
+        initCbuMockResponse(mockResponse);
 
         mockMvc.perform(get("/api/currency")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -98,14 +121,18 @@ class CbuControllerTest {
 
     @Test
     void testGetCurrencies_ConnectionTimeoutError() throws Exception {
-        BaseResponse<List<CurrencyDTO>> mockResponse = new BaseResponse<>(false, CbuErrors.CONNECTION_TIMEOUT_ERROR);
+        BaseResponse<List<CurrencyDTO>> mockResponse = new BaseResponse<>(false, "Connection timeout error", CbuErrors.CONNECTION_TIMEOUT_ERROR);
 
-        Mockito.when(cbuService.getCurrencies()).thenReturn(mockResponse);
+        initCbuMockResponse(mockResponse);
 
         mockMvc.perform(get("/api/currency")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isGatewayTimeout())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("CONNECTION_TIMEOUT_ERROR"));
+    }
+
+    private void initCbuMockResponse(BaseResponse<List<CurrencyDTO>> mockResponse) {
+        Mockito.when(cbuService.getCurrencies()).thenReturn(mockResponse);
     }
 }

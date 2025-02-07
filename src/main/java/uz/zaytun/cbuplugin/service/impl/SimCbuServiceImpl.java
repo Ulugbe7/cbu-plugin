@@ -1,7 +1,6 @@
 package uz.zaytun.cbuplugin.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uz.zaytun.cbuplugin.domain.dto.BaseResponse;
@@ -12,48 +11,49 @@ import java.util.List;
 
 @Slf4j
 @Service
-@Qualifier("impl")
-@ConditionalOnProperty(name = "cbu.cbu.simulate", havingValue = "mock", matchIfMissing = true)
+@ConditionalOnProperty(name = "cbu.setting.simulate", havingValue = "mock", matchIfMissing = true)
 public class SimCbuServiceImpl implements CbuService {
 
     public SimCbuServiceImpl() {
-        log.debug("SimCbuServiceImpl started");
+        log.debug("##### CbuService: simulate service is on #####");
     }
 
     @Override
     public BaseResponse<List<CurrencyDTO>> getCurrencies() {
-        var currencies = loadMockData();
-        log.debug("Mock currencies: {}", currencies);
+        var currencies = loadSimulateData();
+        log.debug("Simulate currencies: {}", currencies);
         return new BaseResponse<>(currencies);
     }
 
-    private List<CurrencyDTO> loadMockData() {
-        var currency1 = new CurrencyDTO(
-                69,
-                "840",
-                "USD",
-                "Доллар США",
-                "AQSH dollari",
-                "АҚШ доллари",
-                "US Dollar",
-                "1",
-                "12985.32",
-                "-13.59",
-                "06.02.2025"
-        );
-        var currency2 = new CurrencyDTO(
-                69,
-                "840",
-                "USD",
-                "Доллар США",
-                "AQSH dollari",
-                "АҚШ доллари",
-                "US Dollar",
-                "1",
-                "12985.32",
-                "-13.59",
-                "06.02.2025"
-        );
+    private List<CurrencyDTO> loadSimulateData() {
+        var currency1 = CurrencyDTO.builder()
+                .id(69)
+                .code("840")
+                .currency("USD")
+                .currencyNameRu("Доллар США")
+                .currencyNameUz("AQSH dollari")
+                .currencyNameUzCyrillic("АҚШ доллари")
+                .currencyNameEn("US Dollar")
+                .nominal("1")
+                .rate("12985.32")
+                .difference("-13.59")
+                .date("06.02.2025")
+                .build();
+
+        var currency2 = CurrencyDTO.builder()
+                .id(69)
+                .code("840")
+                .currency("USD")
+                .currencyNameRu("Доллар США")
+                .currencyNameUz("AQSH dollari")
+                .currencyNameUzCyrillic("АҚШ доллари")
+                .currencyNameEn("US Dollar")
+                .nominal("1")
+                .rate("12985.32")
+                .difference("-13.59")
+                .date("06.02.2025")
+                .build();
+
         return List.of(currency1, currency2);
     }
 }
