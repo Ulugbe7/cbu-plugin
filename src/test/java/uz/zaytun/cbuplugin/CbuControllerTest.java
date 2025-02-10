@@ -50,7 +50,7 @@ class CbuControllerTest {
 
     private List<CurrencyDTO> loadSimulateData() {
         var currency1 = CurrencyDTO.builder()
-                .id(69)
+                .id(69L)
                 .code("840")
                 .currency("USD")
                 .currencyNameRu("Доллар США")
@@ -64,7 +64,7 @@ class CbuControllerTest {
                 .build();
 
         var currency2 = CurrencyDTO.builder()
-                .id(69)
+                .id(69L)
                 .code("841")
                 .currency("EUR")
                 .currencyNameRu("Доллар США")
@@ -133,6 +133,6 @@ class CbuControllerTest {
     }
 
     private void initCbuMockResponse(BaseResponse<List<CurrencyDTO>> mockResponse) {
-        Mockito.when(cbuService.getCurrencies()).thenReturn(mockResponse);
+        Mockito.when(cbuService.getCurrencies(new CurrencyDTO())).thenReturn(mockResponse);
     }
 }

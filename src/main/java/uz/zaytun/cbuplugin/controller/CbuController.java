@@ -1,7 +1,6 @@
 package uz.zaytun.cbuplugin.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,15 +19,7 @@ public class CbuController {
     private final CbuService cbuService;
 
     @GetMapping("/currency")
-    public ResponseEntity<BaseResponse<List<CurrencyDTO>>> getCurrencies() {
-        var cbuResponse = cbuService.getCurrencies();
-        return switch (cbuResponse.getError()) {
-            case SUCCESS -> ResponseEntity.ok(cbuResponse);
-            case CLIENT_ERROR -> ResponseEntity.badRequest().body(cbuResponse);
-            case SERVER_ERROR -> ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(cbuResponse);
-            case CONNECTION_TIMEOUT_ERROR, READ_TIMEOUT_ERROR ->
-                    ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(cbuResponse);
-            default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(cbuResponse);
-        };
+    public ResponseEntity<BaseResponse<List<CurrencyDTO>>> getCurrencies(CurrencyDTO request) {
+        return ResponseEntity.ok(cbuService.getCurrencies(request));
     }
 }

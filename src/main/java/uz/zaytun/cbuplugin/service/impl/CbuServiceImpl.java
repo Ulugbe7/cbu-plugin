@@ -1,6 +1,5 @@
 package uz.zaytun.cbuplugin.service.impl;
 
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -15,8 +14,9 @@ import org.springframework.web.client.RestTemplate;
 import uz.zaytun.cbuplugin.domain.dto.BaseResponse;
 import uz.zaytun.cbuplugin.domain.dto.CurrencyDTO;
 import uz.zaytun.cbuplugin.domain.enumuration.CbuErrors;
+import uz.zaytun.cbuplugin.repository.CurrencyRepository;
 import uz.zaytun.cbuplugin.service.CbuService;
-import uz.zaytun.cbuplugin.utils.ResponseUtils;
+import uz.zaytun.cbuplugin.service.criteria.CurrencyFilter;
 
 import java.net.SocketTimeoutException;
 import java.util.List;
@@ -30,15 +30,24 @@ public class CbuServiceImpl implements CbuService {
 
     private final RestTemplate restTemplate;
 
-    public CbuServiceImpl(@Qualifier(value = "cbuRestTemplate") RestTemplate restTemplate) {
+    private final CurrencyRepository currencyRepository;
+
+    public CbuServiceImpl(@Qualifier(value = "cbuRestTemplate") RestTemplate restTemplate, CurrencyRepository currencyRepository) {
         log.debug("##### CbuService: simulate service is off #####");
         this.restTemplate = restTemplate;
+        this.currencyRepository = currencyRepository;
     }
 
-    @PostConstruct
     @Override
-    public BaseResponse<List<CurrencyDTO>> getCurrencies() {
+    public BaseResponse<List<CurrencyDTO>> getCurrencies(CurrencyDTO request) {
         try {
+            var currencies = currencyRepository.findAll(CurrencyFilter.filter(request));
+            log.info("Repository currencies: {}", currencies);
+            if (!currencies.isEmpty()) {
+                var currencyDTOs = currencies.stream().map(CurrencyDTO::toDTO).toList();
+                return new BaseResponse<>(currencyDTOs);
+            }
+
             ResponseEntity<List<CurrencyDTO>> response = restTemplate.exchange(
                     CBU_CURRENCY_ENDPOINT,
                     HttpMethod.GET,
@@ -46,8 +55,20 @@ public class CbuServiceImpl implements CbuService {
                     new ParameterizedTypeReference<>() {
                     }
             );
-            log.debug("Currencies response: {}", response);
-            return ResponseUtils.validate(response);
+
+            var responseBody = response.getBody();
+            var filteredDTOs = responseBody.stream()
+                    .filter(currencyDTO ->
+                            (request.getCurrency() == null || currencyDTO.getCurrency().equals(request.getCurrency()))
+                                    && (request.getCode() == null || currencyDTO.getCode().equals(request.getCode()))
+                    ).toList();
+
+            log.info("Cbu filtered response: {}", filteredDTOs);
+            if (!filteredDTOs.isEmpty()) {
+                currencyRepository.saveAll(filteredDTOs.stream().map(CurrencyDTO::fromDTO).toList());
+            }
+
+            return new BaseResponse<>(filteredDTOs);
         } catch (HttpClientErrorException e) {
             log.warn("Client error: {}", e.getMessage());
             return new BaseResponse<>(false, e.getMessage(), CbuErrors.CLIENT_ERROR);

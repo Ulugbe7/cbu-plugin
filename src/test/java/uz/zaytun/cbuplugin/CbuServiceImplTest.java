@@ -71,7 +71,7 @@ class CbuServiceImplTest {
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON));
 
-        BaseResponse<List<CurrencyDTO>> response = cbuService.getCurrencies();
+        BaseResponse<List<CurrencyDTO>> response = cbuService.getCurrencies(CurrencyDTO.builder().currency("USD").build());
         log.info("Success test: {}", response);
 
         assertNotNull(response);
@@ -83,7 +83,7 @@ class CbuServiceImplTest {
 
     private List<CurrencyDTO> getListResponseEntity() {
         return List.of(
-                new CurrencyDTO(69, "840", "USD", "Доллар США", "AQSH dollari", "АҚШ доллари",
+                new CurrencyDTO(69L, "840", "USD", "Доллар США", "AQSH dollari", "АҚШ доллари",
                         "US Dollar", "1", "12985.32", "-13.59", "06.02.2025")
         );
     }
@@ -95,7 +95,7 @@ class CbuServiceImplTest {
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withStatus(HttpStatus.BAD_REQUEST));
 
-        BaseResponse<List<CurrencyDTO>> response = cbuService.getCurrencies();
+        BaseResponse<List<CurrencyDTO>> response = cbuService.getCurrencies(new CurrencyDTO());
         log.info("Client error test: {}", response);
 
         assertNotNull(response);
@@ -110,7 +110,7 @@ class CbuServiceImplTest {
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withServerError());
 
-        BaseResponse<List<CurrencyDTO>> response = cbuService.getCurrencies();
+        BaseResponse<List<CurrencyDTO>> response = cbuService.getCurrencies(new CurrencyDTO());
         log.info("Server error test: {}", response);
 
         assertNotNull(response);
@@ -126,7 +126,7 @@ class CbuServiceImplTest {
                     throw new ResourceAccessException("Connection timed out");
                 });
 
-        BaseResponse<List<CurrencyDTO>> response = cbuService.getCurrencies();
+        BaseResponse<List<CurrencyDTO>> response = cbuService.getCurrencies(new CurrencyDTO());
 
         log.info("Connection timeout test: {}", response);
 
@@ -154,7 +154,7 @@ class CbuServiceImplTest {
                         }
                 );
 
-        BaseResponse<List<CurrencyDTO>> response = cbuService.getCurrencies();
+        BaseResponse<List<CurrencyDTO>> response = cbuService.getCurrencies(new CurrencyDTO());
         log.info("Read timeout test: {}", response);
 
         assertNotNull(response);

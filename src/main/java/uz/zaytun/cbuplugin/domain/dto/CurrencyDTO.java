@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uz.zaytun.cbuplugin.domain.data.Currency;
 
 @Data
 @Builder
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class CurrencyDTO {
 
     @JsonProperty("id")
-    private Integer id;
+    private Long id;
 
     @JsonProperty("Code")
     private String code;
@@ -44,4 +45,36 @@ public class CurrencyDTO {
 
     @JsonProperty("Date")
     private String date;
+
+    public static CurrencyDTO toDTO(Currency entity) {
+        return CurrencyDTO.builder()
+                .id(entity.getId())
+                .code(entity.getCode())
+                .currency(entity.getCurrency())
+                .currencyNameRu(entity.getCurrencyNameRu())
+                .currencyNameUz(entity.getCurrencyNameUz())
+                .currencyNameUzCyrillic(entity.getCurrencyNameUzCyrillic())
+                .currencyNameEn(entity.getCurrencyNameEn())
+                .nominal(entity.getNominal())
+                .rate(entity.getRate())
+                .difference(entity.getDifference())
+                .date(entity.getDate())
+                .build();
+    }
+
+    public static Currency fromDTO(CurrencyDTO dto) {
+        return Currency.builder()
+                .code(dto.getCode())
+                .currency(dto.getCurrency())
+                .currencyNameRu(dto.getCurrencyNameRu())
+                .currencyNameUz(dto.getCurrencyNameUz())
+                .currencyNameUzCyrillic(dto.getCurrencyNameUzCyrillic())
+                .currencyNameEn(dto.getCurrencyNameEn())
+                .nominal(dto.getNominal())
+                .rate(dto.getRate())
+                .difference(dto.getDifference())
+                .date(dto.getDate())
+                .build(
+                );
+    }
 }

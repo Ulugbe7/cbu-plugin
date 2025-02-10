@@ -5,14 +5,18 @@ spring:
     jdbc:
       dialect: postgresql
   datasource:
+    url: jdbc:postgresql://localhost:5432/cbu_db
+    driverClassName: org.postgresql.Driver
     username: cbu
     password: cbu123
-    driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://db:5432/cbu_db
 
   jpa:
+    generate-ddl: false
     hibernate:
       ddl-auto: update
+
+server:
+  port: 8081
 
 cbu:
   setting:
@@ -21,3 +25,4 @@ cbu:
   client-config:
     connection-timeout: 5000
     read-timeout: 5000
+

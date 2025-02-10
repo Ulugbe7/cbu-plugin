@@ -19,7 +19,7 @@ public class SimCbuServiceImpl implements CbuService {
     }
 
     @Override
-    public BaseResponse<List<CurrencyDTO>> getCurrencies() {
+    public BaseResponse<List<CurrencyDTO>> getCurrencies(CurrencyDTO request) {
         var currencies = loadSimulateData();
         log.debug("Simulate currencies: {}", currencies);
         return new BaseResponse<>(currencies);
@@ -27,7 +27,7 @@ public class SimCbuServiceImpl implements CbuService {
 
     private List<CurrencyDTO> loadSimulateData() {
         var currency1 = CurrencyDTO.builder()
-                .id(69)
+                .id(69L)
                 .code("840")
                 .currency("USD")
                 .currencyNameRu("Доллар США")
@@ -41,7 +41,7 @@ public class SimCbuServiceImpl implements CbuService {
                 .build();
 
         var currency2 = CurrencyDTO.builder()
-                .id(69)
+                .id(69L)
                 .code("840")
                 .currency("USD")
                 .currencyNameRu("Доллар США")
