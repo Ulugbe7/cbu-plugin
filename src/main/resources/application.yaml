@@ -1,6 +1,18 @@
 spring:
   application:
     name: cbu-plugin
+  data:
+    jdbc:
+      dialect: postgresql
+  datasource:
+    username: cbu
+    password: cbu123
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://db:5432/cbu_db
+
+  jpa:
+    hibernate:
+      ddl-auto: update
 
 cbu:
   setting:
