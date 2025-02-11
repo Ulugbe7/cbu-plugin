@@ -1,4 +1,4 @@
-package uz.zaytun.cbuplugin;
+package uz.zaytun.cbuplugin.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +18,10 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import uz.zaytun.cbuplugin.config.CbuProperties;
 import uz.zaytun.cbuplugin.domain.dto.BaseResponse;
+import uz.zaytun.cbuplugin.domain.dto.CbuCurrencyResponseDTO;
 import uz.zaytun.cbuplugin.domain.dto.CurrencyDTO;
 import uz.zaytun.cbuplugin.domain.enumuration.CbuErrors;
-import uz.zaytun.cbuplugin.service.CbuService;
+import uz.zaytun.cbuplugin.exception.CustomException;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -65,7 +66,7 @@ class CbuServiceImplTest {
     @Test
     void testGetCurrencies_Success() throws Exception {
 
-        List<CurrencyDTO> mockCurrencies = getListResponseEntity();
+        List<CbuCurrencyResponseDTO> mockCurrencies = loadMockCurrencies();
 
         String responseJson = objectMapper.writeValueAsString(mockCurrencies);
 
@@ -73,7 +74,7 @@ class CbuServiceImplTest {
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON));
 
-        BaseResponse<List<CurrencyDTO>> response = cbuService.getCurrencies(CurrencyDTO.builder().currency("USD").build());
+        BaseResponse<List<CurrencyDTO>> response = cbuService.getCurrencies(new CurrencyDTO());
         log.info("Success test: {}", response);
 
         assertNotNull(response);
@@ -83,8 +84,8 @@ class CbuServiceImplTest {
         assertEquals("USD", response.getData().get(0).getCurrency());
     }
 
-    private List<CurrencyDTO> getListResponseEntity() {
-        var currencyUSD = CurrencyDTO.builder()
+    private List<CbuCurrencyResponseDTO> loadMockCurrencies() {
+        var currencyUSD = CbuCurrencyResponseDTO.builder()
                 .id(69L)
                 .code("840")
                 .currency("USD")
@@ -103,17 +104,12 @@ class CbuServiceImplTest {
 
     @Test
     void testGetCurrencies_ClientError() {
-
         mockServer.expect(ExpectedCount.once(), requestTo(cbuProperties.getSetting().getBaseUrl() + CBU_CURRENCY_ENDPOINT))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withStatus(HttpStatus.BAD_REQUEST));
 
-        BaseResponse<List<CurrencyDTO>> response = cbuService.getCurrencies(new CurrencyDTO());
-        log.info("Client error test: {}", response);
-
-        assertNotNull(response);
-        assertFalse(response.getSuccess());
-        assertEquals(CbuErrors.CLIENT_ERROR, response.getError());
+        CustomException exception = assertThrows(CustomException.class, () -> cbuService.getCurrencies(new CurrencyDTO()));
+        assertEquals(CbuErrors.CLIENT_ERROR, exception.getError());
     }
 
     @Test
@@ -123,12 +119,8 @@ class CbuServiceImplTest {
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withServerError());
 
-        BaseResponse<List<CurrencyDTO>> response = cbuService.getCurrencies(new CurrencyDTO());
-        log.info("Server error test: {}", response);
-
-        assertNotNull(response);
-        assertFalse(response.getSuccess());
-        assertEquals(CbuErrors.SERVER_ERROR, response.getError());
+        CustomException exception = assertThrows(CustomException.class, () -> cbuService.getCurrencies(new CurrencyDTO()));
+        assertEquals(CbuErrors.SERVER_ERROR, exception.getError());
     }
 
     @Test
@@ -139,13 +131,8 @@ class CbuServiceImplTest {
                     throw new ResourceAccessException("Connection timed out");
                 });
 
-        BaseResponse<List<CurrencyDTO>> response = cbuService.getCurrencies(new CurrencyDTO());
-
-        log.info("Connection timeout test: {}", response);
-
-        assertNotNull(response);
-        assertFalse(response.getSuccess());
-        assertEquals(CbuErrors.CONNECTION_TIMEOUT_ERROR, response.getError());
+        CustomException exception = assertThrows(CustomException.class, () -> cbuService.getCurrencies(new CurrencyDTO()));
+        assertEquals(CbuErrors.CONNECTION_TIMEOUT_ERROR, exception.getError());
     }
 
     @Test
@@ -167,11 +154,7 @@ class CbuServiceImplTest {
                         }
                 );
 
-        BaseResponse<List<CurrencyDTO>> response = cbuService.getCurrencies(new CurrencyDTO());
-        log.info("Read timeout test: {}", response);
-
-        assertNotNull(response);
-        assertFalse(response.getSuccess());
-        assertEquals(CbuErrors.READ_TIMEOUT_ERROR, response.getError());
+        CustomException exception = assertThrows(CustomException.class, () -> cbuService.getCurrencies(new CurrencyDTO()));
+        assertEquals(CbuErrors.READ_TIMEOUT_ERROR, exception.getError());
     }
 }

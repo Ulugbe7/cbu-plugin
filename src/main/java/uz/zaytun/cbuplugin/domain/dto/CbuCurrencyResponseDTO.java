@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uz.zaytun.cbuplugin.domain.data.Currency;
 
 @Data
 @Builder
@@ -45,20 +44,4 @@ public class CbuCurrencyResponseDTO {
 
     @JsonProperty("Date")
     private String date;
-
-    public static Currency fromDTO(CbuCurrencyResponseDTO dto) {
-        return Currency.builder()
-                .code(dto.getCode())
-                .currency(dto.getCurrency())
-                .currencyNameRu(dto.getCurrencyNameRu())
-                .currencyNameUz(dto.getCurrencyNameUz())
-                .currencyNameUzCyrillic(dto.getCurrencyNameUzCyrillic())
-                .currencyNameEn(dto.getCurrencyNameEn())
-                .nominal(dto.getNominal())
-                .rate(dto.getRate())
-                .difference(dto.getDifference())
-                .date(dto.getDate())
-                .build(
-                );
-    }
 }

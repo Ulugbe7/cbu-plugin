@@ -18,11 +18,13 @@ import uz.zaytun.cbuplugin.domain.enumuration.CbuErrors;
 import uz.zaytun.cbuplugin.exception.CustomException;
 import uz.zaytun.cbuplugin.service.CbuService;
 import uz.zaytun.cbuplugin.service.CurrencyService;
+import uz.zaytun.cbuplugin.service.mapper.CurrencyMapper;
 
 import java.net.SocketTimeoutException;
 import java.util.List;
 
 import static uz.zaytun.cbuplugin.service.CbuService.CBU_SERVICE;
+
 
 @Slf4j
 @Service(value = CBU_SERVICE)
@@ -31,12 +33,15 @@ public class CbuServiceImpl implements CbuService {
 
     private final RestTemplate restTemplate;
 
+    private final CurrencyMapper currencyMapper;
+
     private final CurrencyService currencyService;
 
-    public CbuServiceImpl(@Qualifier(value = "cbuRestTemplate") RestTemplate restTemplate, CurrencyService currencyService) {
+    public CbuServiceImpl(@Qualifier(value = "cbuRestTemplate") RestTemplate restTemplate, CurrencyMapper currencyMapper, CurrencyService currencyService) {
         log.debug("##### CbuService: simulate service is off #####");
-        this.currencyService = currencyService;
         this.restTemplate = restTemplate;
+        this.currencyMapper = currencyMapper;
+        this.currencyService = currencyService;
     }
 
     @Override
@@ -50,23 +55,24 @@ public class CbuServiceImpl implements CbuService {
                     }
             );
 
-            if (response.getBody() != null) {
-                var responseBody = response.getBody();
-                log.info("Cbu currencies response: {}", responseBody);
-                var filteredDTOs = responseBody.stream()
-                        .filter(currencyDTO ->
-                                (request.getCurrency() == null || currencyDTO.getCurrency().equals(request.getCurrency()))
-                                        && (request.getCode() == null || currencyDTO.getCode().equals(request.getCode()))
-                        ).toList();
-
-                log.info("Cbu filtered response: {}", filteredDTOs);
-                if (!filteredDTOs.isEmpty()) {
-                    currencyService.saveAll(filteredDTOs);
-                }
-                return new BaseResponse<>(filteredDTOs.stream().map(CurrencyDTO::toDTO).toList());
-            } else {
+            if (response.getBody() == null) {
                 throw new CustomException(CbuErrors.NULL_RESPONSE_ERROR, "cbu currency response body is null");
             }
+
+            var responseBody = response.getBody();
+            log.info("Cbu currencies response size: {}", responseBody.size());
+            var filteredDTOs = responseBody.stream()
+                    .filter(currencyDTO ->
+                            (request.getCurrency() == null || currencyDTO.getCurrency().equals(request.getCurrency()))
+                                    && (request.getCode() == null || currencyDTO.getCode().equals(request.getCode()))
+                    ).toList();
+
+            log.info("Cbu filtered response size: {}", filteredDTOs.size());
+            if (!filteredDTOs.isEmpty()) {
+                currencyService.saveAll(filteredDTOs);
+            }
+            return new BaseResponse<>(filteredDTOs.stream().map(currencyMapper::toDto).toList());
+
         } catch (HttpClientErrorException e) {
             log.warn("Client error: {}", e.getMessage());
             throw new CustomException(CbuErrors.CLIENT_ERROR, e.getMessage());

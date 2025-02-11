@@ -1,18 +1,19 @@
-package uz.zaytun.cbuplugin;
+package uz.zaytun.cbuplugin.controller;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import uz.zaytun.cbuplugin.controller.CurrencyController;
 import uz.zaytun.cbuplugin.domain.dto.BaseResponse;
 import uz.zaytun.cbuplugin.domain.dto.CurrencyDTO;
 import uz.zaytun.cbuplugin.domain.enumuration.CbuErrors;
-import uz.zaytun.cbuplugin.service.CbuService;
+import uz.zaytun.cbuplugin.exception.CustomException;
+import uz.zaytun.cbuplugin.exception.ExceptionManager;
+import uz.zaytun.cbuplugin.service.CurrencyFetchService;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
+@Import(ExceptionManager.class)
 @WebMvcTest(controllers = CurrencyController.class)
 class CurrencyControllerTest {
 
@@ -28,7 +29,7 @@ class CurrencyControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private CbuService cbuService;
+    private CurrencyFetchService currencyFetchService;
 
     @Test
     void testGetCurrencies_Success() throws Exception {
@@ -42,10 +43,10 @@ class CurrencyControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data[0].Ccy").value("USD"))
-                .andExpect(jsonPath("$.data[0].Code").value("840"))
-                .andExpect(jsonPath("$.data[1].Ccy").value("EUR"))
-                .andExpect(jsonPath("$.data[1].Code").value("841"));
+                .andExpect(jsonPath("$.data[0].currency").value("USD"))
+                .andExpect(jsonPath("$.data[0].code").value("840"))
+                .andExpect(jsonPath("$.data[1].currency").value("EUR"))
+                .andExpect(jsonPath("$.data[1].code").value("841"));
     }
 
     private List<CurrencyDTO> loadSimulateData() {
@@ -82,9 +83,9 @@ class CurrencyControllerTest {
 
     @Test
     void testGetCurrencies_ClientError() throws Exception {
-        BaseResponse<List<CurrencyDTO>> mockResponse = new BaseResponse<>(false, "Client error", CbuErrors.CLIENT_ERROR);
 
-        initCbuMockResponse(mockResponse);
+        Mockito.when(currencyFetchService.fetchCurrencies(new CurrencyDTO()))
+                .thenThrow(new CustomException(CbuErrors.CLIENT_ERROR, "CLIENT_ERROR"));
 
         mockMvc.perform(get("/api/currency")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -95,9 +96,8 @@ class CurrencyControllerTest {
 
     @Test
     void testGetCurrencies_ServerError() throws Exception {
-        BaseResponse<List<CurrencyDTO>> mockResponse = new BaseResponse<>(false, "Server error", CbuErrors.SERVER_ERROR);
-
-        initCbuMockResponse(mockResponse);
+        Mockito.when(currencyFetchService.fetchCurrencies(new CurrencyDTO()))
+                .thenThrow(new CustomException(CbuErrors.SERVER_ERROR, "SERVER_ERROR"));
 
         mockMvc.perform(get("/api/currency")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -108,9 +108,8 @@ class CurrencyControllerTest {
 
     @Test
     void testGetCurrencies_TimeoutError() throws Exception {
-        BaseResponse<List<CurrencyDTO>> mockResponse = new BaseResponse<>(false, "Timeout error", CbuErrors.READ_TIMEOUT_ERROR);
-
-        initCbuMockResponse(mockResponse);
+        Mockito.when(currencyFetchService.fetchCurrencies(new CurrencyDTO()))
+                .thenThrow(new CustomException(CbuErrors.READ_TIMEOUT_ERROR, "READ_TIMEOUT_ERROR"));
 
         mockMvc.perform(get("/api/currency")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -121,9 +120,8 @@ class CurrencyControllerTest {
 
     @Test
     void testGetCurrencies_ConnectionTimeoutError() throws Exception {
-        BaseResponse<List<CurrencyDTO>> mockResponse = new BaseResponse<>(false, "Connection timeout error", CbuErrors.CONNECTION_TIMEOUT_ERROR);
-
-        initCbuMockResponse(mockResponse);
+        Mockito.when(currencyFetchService.fetchCurrencies(new CurrencyDTO()))
+                .thenThrow(new CustomException(CbuErrors.CONNECTION_TIMEOUT_ERROR, "CONNECTION_TIMEOUT_ERROR"));
 
         mockMvc.perform(get("/api/currency")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -133,6 +131,6 @@ class CurrencyControllerTest {
     }
 
     private void initCbuMockResponse(BaseResponse<List<CurrencyDTO>> mockResponse) {
-        Mockito.when(cbuService.getCurrencies(new CurrencyDTO())).thenReturn(mockResponse);
+        Mockito.when(currencyFetchService.fetchCurrencies(new CurrencyDTO())).thenReturn(mockResponse);
     }
 }

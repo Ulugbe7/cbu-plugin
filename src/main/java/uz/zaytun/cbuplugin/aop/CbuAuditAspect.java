@@ -23,14 +23,14 @@ import java.util.Enumeration;
 @Aspect
 @Component
 @RequiredArgsConstructor
-public class CbuLoggingAop {
+public class CbuAuditAspect {
 
     private final ObjectMapper objectMapper;
 
     private final RequestLogRepository requestLogRepository;
     private final ResponseLogRepository responseLogRepository;
 
-    @Around("execution(* uz.zaytun.cbuplugin.controller..*(..))")
+    @Around("@within(org.springframework.web.bind.annotation.RestController)")
     public Object logRequests(ProceedingJoinPoint joinPoint) throws Throwable {
         HttpServletRequest request = RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes
                 ? ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest()
