@@ -9,11 +9,12 @@ spring:
     driverClassName: org.postgresql.Driver
     username: cbu
     password: cbu123
-
+  liquibase:
+    change-log: classpath:db/master.xml
   jpa:
     generate-ddl: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
 
 server:
   port: 8081
@@ -25,4 +26,3 @@ cbu:
   client-config:
     connection-timeout: 5000
     read-timeout: 5000
-

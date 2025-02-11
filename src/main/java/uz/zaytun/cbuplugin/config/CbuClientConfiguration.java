@@ -5,7 +5,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -22,22 +21,18 @@ public class CbuClientConfiguration {
 
     @Bean(value = "cbuRestTemplate")
     public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(cbuProperties.getClientConfig().getConnectionTimeout());
+        factory.setReadTimeout(cbuProperties.getClientConfig().getReadTimeout());
         return restTemplateBuilder
                 .messageConverters(createMessageConverters())
                 .rootUri(cbuProperties.getSetting().getBaseUrl())
+                .requestFactory(() -> factory)
                 .build();
     }
 
     private List<HttpMessageConverter<?>> createMessageConverters() {
         MappingJackson2HttpMessageConverter jsonMessageConverter = new MappingJackson2HttpMessageConverter();
         return List.of(jsonMessageConverter);
-    }
-
-    @Bean
-    public ClientHttpRequestFactory clientHttpRequestFactory() {
-        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(cbuProperties.getClientConfig().getConnectionTimeout());
-        factory.setReadTimeout(cbuProperties.getClientConfig().getReadTimeout());
-        return factory;
     }
 }

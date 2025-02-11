@@ -26,7 +26,7 @@ public class SimCbuServiceImpl implements CbuService {
     }
 
     private List<CurrencyDTO> loadSimulateData() {
-        var currency1 = CurrencyDTO.builder()
+        var currencyUSD = CurrencyDTO.builder()
                 .id(69L)
                 .code("840")
                 .currency("USD")
@@ -40,10 +40,10 @@ public class SimCbuServiceImpl implements CbuService {
                 .date("06.02.2025")
                 .build();
 
-        var currency2 = CurrencyDTO.builder()
-                .id(69L)
-                .code("840")
-                .currency("USD")
+        var currencyEUR = CurrencyDTO.builder()
+                .id(21L)
+                .code("841")
+                .currency("EUR")
                 .currencyNameRu("Доллар США")
                 .currencyNameUz("AQSH dollari")
                 .currencyNameUzCyrillic("АҚШ доллари")
@@ -54,7 +54,7 @@ public class SimCbuServiceImpl implements CbuService {
                 .date("06.02.2025")
                 .build();
 
-        return List.of(currency1, currency2);
+        return List.of(currencyUSD, currencyEUR);
     }
 }
 

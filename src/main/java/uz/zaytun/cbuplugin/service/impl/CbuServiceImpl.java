@@ -12,11 +12,12 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import uz.zaytun.cbuplugin.domain.dto.BaseResponse;
+import uz.zaytun.cbuplugin.domain.dto.CbuCurrencyResponseDTO;
 import uz.zaytun.cbuplugin.domain.dto.CurrencyDTO;
 import uz.zaytun.cbuplugin.domain.enumuration.CbuErrors;
-import uz.zaytun.cbuplugin.repository.CurrencyRepository;
+import uz.zaytun.cbuplugin.exception.CustomException;
 import uz.zaytun.cbuplugin.service.CbuService;
-import uz.zaytun.cbuplugin.service.criteria.CurrencyFilter;
+import uz.zaytun.cbuplugin.service.CurrencyService;
 
 import java.net.SocketTimeoutException;
 import java.util.List;
@@ -30,25 +31,18 @@ public class CbuServiceImpl implements CbuService {
 
     private final RestTemplate restTemplate;
 
-    private final CurrencyRepository currencyRepository;
+    private final CurrencyService currencyService;
 
-    public CbuServiceImpl(@Qualifier(value = "cbuRestTemplate") RestTemplate restTemplate, CurrencyRepository currencyRepository) {
+    public CbuServiceImpl(@Qualifier(value = "cbuRestTemplate") RestTemplate restTemplate, CurrencyService currencyService) {
         log.debug("##### CbuService: simulate service is off #####");
+        this.currencyService = currencyService;
         this.restTemplate = restTemplate;
-        this.currencyRepository = currencyRepository;
     }
 
     @Override
     public BaseResponse<List<CurrencyDTO>> getCurrencies(CurrencyDTO request) {
         try {
-            var currencies = currencyRepository.findAll(CurrencyFilter.filter(request));
-            log.info("Repository currencies: {}", currencies);
-            if (!currencies.isEmpty()) {
-                var currencyDTOs = currencies.stream().map(CurrencyDTO::toDTO).toList();
-                return new BaseResponse<>(currencyDTOs);
-            }
-
-            ResponseEntity<List<CurrencyDTO>> response = restTemplate.exchange(
+            ResponseEntity<List<CbuCurrencyResponseDTO>> response = restTemplate.exchange(
                     CBU_CURRENCY_ENDPOINT,
                     HttpMethod.GET,
                     null,
@@ -56,35 +50,39 @@ public class CbuServiceImpl implements CbuService {
                     }
             );
 
-            var responseBody = response.getBody();
-            var filteredDTOs = responseBody.stream()
-                    .filter(currencyDTO ->
-                            (request.getCurrency() == null || currencyDTO.getCurrency().equals(request.getCurrency()))
-                                    && (request.getCode() == null || currencyDTO.getCode().equals(request.getCode()))
-                    ).toList();
+            if (response.getBody() != null) {
+                var responseBody = response.getBody();
+                log.info("Cbu currencies response: {}", responseBody);
+                var filteredDTOs = responseBody.stream()
+                        .filter(currencyDTO ->
+                                (request.getCurrency() == null || currencyDTO.getCurrency().equals(request.getCurrency()))
+                                        && (request.getCode() == null || currencyDTO.getCode().equals(request.getCode()))
+                        ).toList();
 
-            log.info("Cbu filtered response: {}", filteredDTOs);
-            if (!filteredDTOs.isEmpty()) {
-                currencyRepository.saveAll(filteredDTOs.stream().map(CurrencyDTO::fromDTO).toList());
+                log.info("Cbu filtered response: {}", filteredDTOs);
+                if (!filteredDTOs.isEmpty()) {
+                    currencyService.saveAll(filteredDTOs);
+                }
+                return new BaseResponse<>(filteredDTOs.stream().map(CurrencyDTO::toDTO).toList());
+            } else {
+                throw new CustomException(CbuErrors.NULL_RESPONSE_ERROR, "cbu currency response body is null");
             }
-
-            return new BaseResponse<>(filteredDTOs);
         } catch (HttpClientErrorException e) {
             log.warn("Client error: {}", e.getMessage());
-            return new BaseResponse<>(false, e.getMessage(), CbuErrors.CLIENT_ERROR);
+            throw new CustomException(CbuErrors.CLIENT_ERROR, e.getMessage());
         } catch (HttpServerErrorException e) {
             log.warn("Server error: {}", e.getMessage());
-            return new BaseResponse<>(false, e.getMessage(), CbuErrors.SERVER_ERROR);
+            throw new CustomException(CbuErrors.SERVER_ERROR, e.getMessage());
         } catch (ResourceAccessException e) {
             if (e.getCause() instanceof SocketTimeoutException) {
                 log.error("Read timeout error occurred", e);
-                return new BaseResponse<>(false, e.getMessage(), CbuErrors.READ_TIMEOUT_ERROR);
+                throw new CustomException(CbuErrors.READ_TIMEOUT_ERROR, e.getMessage());
             }
             log.warn("Connection timeout error: {}", e.getMessage());
-            return new BaseResponse<>(false, e.getMessage(), CbuErrors.CONNECTION_TIMEOUT_ERROR);
+            throw new CustomException(CbuErrors.CONNECTION_TIMEOUT_ERROR, e.getMessage());
         } catch (Exception e) {
             log.warn("Unexpected error in getCurrencies: {}", e.getMessage());
-            return new BaseResponse<>(false, e.getMessage(), CbuErrors.UNKNOWN_ERROR);
+            throw new CustomException(CbuErrors.UNKNOWN_ERROR, e.getMessage());
         }
     }
 }

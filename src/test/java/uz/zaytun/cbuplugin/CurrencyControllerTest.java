@@ -8,7 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import uz.zaytun.cbuplugin.controller.CbuController;
+import uz.zaytun.cbuplugin.controller.CurrencyController;
 import uz.zaytun.cbuplugin.domain.dto.BaseResponse;
 import uz.zaytun.cbuplugin.domain.dto.CurrencyDTO;
 import uz.zaytun.cbuplugin.domain.enumuration.CbuErrors;
@@ -21,8 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-@WebMvcTest(controllers = CbuController.class)
-class CbuControllerTest {
+@WebMvcTest(controllers = CurrencyController.class)
+class CurrencyControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -49,7 +49,7 @@ class CbuControllerTest {
     }
 
     private List<CurrencyDTO> loadSimulateData() {
-        var currency1 = CurrencyDTO.builder()
+        var currencyUSD = CurrencyDTO.builder()
                 .id(69L)
                 .code("840")
                 .currency("USD")
@@ -63,7 +63,7 @@ class CbuControllerTest {
                 .date("06.02.2025")
                 .build();
 
-        var currency2 = CurrencyDTO.builder()
+        var currencyEUR = CurrencyDTO.builder()
                 .id(69L)
                 .code("841")
                 .currency("EUR")
@@ -77,7 +77,7 @@ class CbuControllerTest {
                 .date("06.02.2025")
                 .build();
 
-        return List.of(currency1, currency2);
+        return List.of(currencyUSD, currencyEUR);
     }
 
     @Test

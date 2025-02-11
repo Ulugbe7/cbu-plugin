@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -45,6 +46,7 @@ class CbuServiceImplTest {
     private CbuService cbuService;
 
     @Autowired
+    @Qualifier(value = "cbuObjectMapper")
     private ObjectMapper objectMapper;
 
     private MockRestServiceServer mockServer;
@@ -82,10 +84,21 @@ class CbuServiceImplTest {
     }
 
     private List<CurrencyDTO> getListResponseEntity() {
-        return List.of(
-                new CurrencyDTO(69L, "840", "USD", "Доллар США", "AQSH dollari", "АҚШ доллари",
-                        "US Dollar", "1", "12985.32", "-13.59", "06.02.2025")
-        );
+        var currencyUSD = CurrencyDTO.builder()
+                .id(69L)
+                .code("840")
+                .currency("USD")
+                .currencyNameRu("Доллар США")
+                .currencyNameUz("AQSH dollari")
+                .currencyNameUzCyrillic("АҚШ доллари")
+                .currencyNameEn("US Dollar")
+                .nominal("1")
+                .rate("12985.32")
+                .difference("-13.59")
+                .date("06.02.2025")
+                .build();
+
+        return List.of(currencyUSD);
     }
 
     @Test
