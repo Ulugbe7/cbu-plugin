@@ -9,7 +9,7 @@
                         startValue="1"
                         incrementBy="1"
                         minValue="1"
-                        cacheSize="20"
+                        cacheSize="50"
                         cycle="false"/>
     </changeSet>
 
