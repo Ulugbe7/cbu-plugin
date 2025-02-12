@@ -4,11 +4,18 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
+    <changeSet id="create-sequence-response_log_id_seq" author="ulugbek">
+        <createSequence sequenceName="response_log_id_seq"
+                        startValue="1"
+                        incrementBy="1"
+                        minValue="1"
+                        cacheSize="20"
+                        cycle="false"/>
+    </changeSet>
+
     <changeSet id="create-table-response-log" author="ulugbek">
         <createTable tableName="response_log">
-            <column name="id" type="bigint" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
+            <column name="id" type="bigint" defaultValueSequenceNext="response_log_id_seq"/>
             <column name="response" type="clob"/>
             <column name="request_log_id" type="bigint">
                 <constraints nullable="false" foreignKeyName="fk_response_request" references="request_log(id)"/>
