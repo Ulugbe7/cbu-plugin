@@ -18,8 +18,8 @@ class CurrencyRepositoryTest {
     @Autowired
     private CurrencyRepository currencyRepository;
 
-    Currency currencyUSD;
-    Currency currencyEUR;
+    private Currency currencyUSD;
+    private Currency currencyEUR;
 
     @BeforeEach
     public void setUp() {
@@ -60,15 +60,15 @@ class CurrencyRepositoryTest {
 
     @Test
     void check_currency_is_saved_database() {
-        var mCurrencyUSD = currencyRepository.findById(currencyUSD.getId()).orElse(null);
-        var mCurrencyEUR = currencyRepository.findById(currencyEUR.getId()).orElse(null);
+        var foundCurrencyUSD = currencyRepository.findById(currencyUSD.getId()).orElse(null);
+        var foundCurrencyEUR = currencyRepository.findById(currencyEUR.getId()).orElse(null);
 
-        assertNotNull(mCurrencyUSD);
-        assertNotNull(mCurrencyEUR);
+        assertNotNull(foundCurrencyUSD);
+        assertNotNull(foundCurrencyEUR);
 
-        assertEquals(currencyUSD, mCurrencyUSD);
-        assertEquals(currencyEUR, mCurrencyEUR);
+        assertEquals(currencyUSD, foundCurrencyUSD);
+        assertEquals(currencyEUR, foundCurrencyEUR);
 
-        assertEquals(1L, mCurrencyEUR.getId() - mCurrencyUSD.getId());
+        assertEquals(1L, foundCurrencyEUR.getId() - foundCurrencyUSD.getId());
     }
 }
